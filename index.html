@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Germana Expert ULTIMATE - Versiune Finală</title>
+    <style>
+        :root { 
+            --bg-app: #f0f2f5; --bg-card: #ffffff; 
+            --f-size-read: 24px; --f-size-trans: 18px;
+            --main-green: #28a745;
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-app); padding-top: 75px; transition: 0.3s; }
+        
+        #top-bar { position: fixed; top: 0; width: 100%; height: 70px; background: var(--main-green); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-weight: bold; }
+        .nav-btns { display: flex; gap: 15px; align-items: center; }
+        .nav-icon { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+
+        .grid-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; }
+        .lvl-btn { border: none; padding: 18px 5px; border-radius: 15px; color: white; font-weight: bold; cursor: pointer; font-size: 18px; background: #6c757d; box-shadow: 0 4px 0 #4a5157; }
+        .lvl-btn:active { transform: translateY(3px); box-shadow: none; }
+        .active-lvl { background: var(--main-green) !important; box-shadow: 0 4px 0 #1e7e34 !important; }
+
+        .card { background: var(--bg-card); margin: 12px; padding: 20px; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
+        .hidden { display: none !important; }
+
+        .audio-bar { position: sticky; top: 70px; background: white; z-index: 900; display: flex; justify-content: center; gap: 20px; padding: 10px; border-bottom: 2px solid #eee; margin: -20px -20px 20px -20px; border-radius: 18px 18px 0 0; }
+        .btn-circle { width: 45px; height: 45px; border-radius: 50%; border: none; background: #f8f9fa; cursor: pointer; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+
+        #reader-display { line-height: 1.8; font-size: var(--f-size-read); min-height: 200px; }
+        .word { cursor: pointer; padding: 0 3px; border-radius: 5px; display: inline-block; transition: 0.2s; position: relative; z-index: 10; }
+        .highlight-green { background: #d4edda !important; color: #155724 !important; font-weight: bold; border: 1px solid #c3e6cb; }
+        
+        #trans-box { min-height: 50px; background: #e9f7ef; color: #155724; font-weight: bold; font-size: var(--f-size-trans); text-align: center; margin-bottom: 15px; padding: 10px; border-radius: 10px; border-left: 5px solid var(--main-green); }
+
+        /* TEST OPT - Stilizat pentru explicații */
+        .test-opt { display: flex; flex-direction: column; background: #f8f9fa; border: 2px solid #eee; border-radius: 12px; margin: 10px 0; padding: 15px; cursor: pointer; font-size: 17px; }
+        .ans-correct { background: #d4edda !important; border-color: #28a745 !important; }
+        .ans-wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
+        .expl-text { margin-top: 10px; font-size: 14px; border-top: 1px solid rgba(0,0,0,0.1); padding-top: 8px; display: none; color: #333; }
+
+        .blank-space { border-bottom: 3px solid #555; min-width: 60px; display: inline-block; text-align: center; color: var(--main-green); font-weight: bold; padding: 0 5px; }
+
+        /* Navigare Test */
+        .test-nav { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-nav { flex: 1; padding: 15px; border-radius: 25px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; background: #a3bffa; color: #1e3a8a; }
+
+        /* SIDE PANEL - 5% Mai mic conform cerinței */
+        .side-panel { position: fixed; top: 0; right: 0; width: 88%; height: 100%; background: white; z-index: 2000; padding: 22px; box-shadow: -5px 0 20px rgba(0,0,0,0.2); transform: translateX(100%); transition: 0.4s; overflow-y: auto; }
+        .side-panel.open { transform: translateX(0); }
+        .side-panel label { display: block; margin-top: 12px; font-weight: bold; color: #333; font-size: 14px; }
+        .side-panel input, .side-panel select, .side-panel textarea { width: 100%; padding: 10px; margin-top: 4px; border-radius: 9px; border: 1px solid #ddd; font-size: 15px; }
+    </style>
+</head>
+<body>
+
+<div id="top-bar">
+    <div class="nav-btns">
+        <button class="nav-icon" onclick="goHome()">⬅️</button>
+        <button class="nav-icon" id="test-counter">0/0</button>
+    </div>
+    <span id="nav-title">GERMANA MASTER</span>
+    <button onclick="toggleSet()" style="background:none; border:none; color:white; font-size:28px;">⚙️</button>
+</div>
+
+<div id="home-screen">
+    <div id="resume-container" style="padding: 0 15px;" class="hidden">
+        <button class="lvl-btn" style="width:100%; background:#6c757d; margin-bottom: 15px;" onclick="resumeTest()">🔄 REIA DE UNDE AI RĂMAS</button>
+    </div>
+    <div class="grid-levels">
+        <button class="lvl-btn" onclick="openLvl('A1')">A1</button>
+        <button class="lvl-btn" onclick="openLvl('A2')">A2</button>
+        <button class="lvl-btn" onclick="openLvl('B1')">B1</button>
+        <button class="lvl-btn" onclick="openLvl('B2')">B2</button>
+        <button class="lvl-btn" onclick="openLvl('C1')">C1</button>
+        <button class="lvl-btn" onclick="openLvl('C2')">C2</button>
+    </div>
+</div>
+
+<div id="lvl-screen" class="card hidden">
+    <div style="display:flex; gap:10px; margin-bottom:20px;">
+        <button class="lvl-btn active-lvl" style="flex:2" onclick="switchTab('L')">Lecturi</button>
+        <button class="lvl-btn active-lvl" style="flex:2" onclick="switchTab('T')">Teste</button>
+    </div>
+    <div id="content-list"></div>
+</div>
+
+<div id="work-screen" class="card hidden">
+    <div id="audio-ui" class="audio-bar hidden">
+        <button class="btn-circle" onclick="playAll()">▶️</button>
+        <button class="btn-circle" onclick="playSelect()">🎯</button>
+        <button class="btn-circle" onclick="pauseAudio()">⏸️</button>
+        <button class="btn-circle" onclick="stopAudio()">⏹️</button>
+    </div>
+    <div id="trans-box">Apasă pe cuvinte pentru traducere</div>
+    <div id="reader-display"></div>
+    <div id="test-ui" class="hidden" style="margin-top:10px;"></div>
+    
+    <div id="nav-test-btns" class="test-nav hidden">
+        <button class="btn-nav" style="background:#6c757d; color:white;" onclick="prevQ()">Înapoi</button>
+        <button class="btn-nav" onclick="nextQ()">Înainte</button>
+    </div>
+
+    <button class="lvl-btn" style="width:100%; margin-top:25px; background:#6c757d" onclick="backToList()">⬅️ Lista</button>
+</div>
+
+<div id="set-panel" class="side-panel">
+    <h3>⚙️ Setări & Backup</h3>
+    <label>Culoare Fundal:</label>
+    <input type="color" id="cfg-bg" onchange="applyCfg()">
+    <label>Font Lectură: <span id="val-f1">24</span>px</label>
+    <input type="range" id="cfg-f1" min="14" max="40" value="24" oninput="applyCfg()">
+    <label>Viteză Voce:</label>
+    <input type="range" id="cfg-rate" min="0.4" max="1.6" step="0.1" value="1" onchange="applyCfg()">
+    <hr>
+    <h3>➕ Adaugă Material</h3>
+    <select id="in-lvl"><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select>
+    <select id="in-type"><option value="L">📄 Lectură</option><option value="T">🧠 Test</option></select>
+    <input type="text" id="in-title" placeholder="Titlu">
+    <textarea id="in-body" style="height:100px" placeholder="Wir ___ | suntem | Corect! | binn | Greșit..."></textarea>
+    <button class="lvl-btn active-lvl" style="width:100%; margin-top:10px;" onclick="saveData()">💾 SALVEAZĂ</button>
+    <button class="lvl-btn" style="width:100%; background:#343a40; margin-top:20px" onclick="toggleSet()">ÎNCHIDE</button>
+</div>
+
+<script>
+    let db = JSON.parse(localStorage.getItem('gm_db_v3') || '{"A1":[],"A2":[],"B1":[],"B2":[],"C1":[],"C2":[]}');
+    let config = JSON.parse(localStorage.getItem('gm_config') || '{"bg":"#f0f2f5","font":"24","rate":"1"}');
+    let curLvl = '', curTab = 'L', curSession = [], curIdx = 0, score = 0, synth = window.speechSynthesis;
+    let lastRawBody = '';
+
+    window.onload = () => { loadCfg(); checkResume(); };
+
+    function checkResume() {
+        if(localStorage.getItem('gm_last_test')) document.getElementById('resume-container').classList.remove('hidden');
+    }
+
+    function loadCfg() {
+        document.getElementById('cfg-bg').value = config.bg;
+        document.getElementById('cfg-f1').value = config.font;
+        document.getElementById('cfg-rate').value = config.rate;
+        applyCfg(false);
+    }
+
+    function applyCfg(save = true) {
+        config.bg = document.getElementById('cfg-bg').value;
+        config.font = document.getElementById('cfg-f1').value;
+        config.rate = document.getElementById('cfg-rate').value;
+        document.body.style.background = config.bg;
+        document.documentElement.style.setProperty('--f-size-read', config.font + 'px');
+        document.getElementById('val-f1').innerText = config.font;
+        if(save) localStorage.setItem('gm_config', JSON.stringify(config));
+    }
+
+    function openLvl(l) {
+        curLvl = l;
+        document.getElementById('home-screen').classList.add('hidden');
+        document.getElementById('lvl-screen').classList.remove('hidden');
+        document.getElementById('nav-title').innerText = "Nivel " + l;
+        switchTab('L');
+    }
+
+    function switchTab(t) { curTab = t; renderList(); }
+
+    function renderList() {
+        let items = db[curLvl].filter(i => i.type === curTab);
+        document.getElementById('content-list').innerHTML = items.map((item) => `
+            <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #eee;">
+                <span onclick="startWork('${curLvl}', ${db[curLvl].indexOf(item)})" style="cursor:pointer; flex:1; font-weight:bold;">${curTab==='L'?'📄':'🧠'} ${item.title}</span>
+                <button onclick="delItem('${curLvl}', ${db[curLvl].indexOf(item)})" style="color:red; border:none; background:none;">X</button>
+            </div>
+        `).join('') || '<p style="text-align:center;">Gol.</p>';
+    }
+
+    function startWork(l, idx) {
+        let item = db[l][idx];
+        document.getElementById('lvl-screen').classList.add('hidden');
+        document.getElementById('work-screen').classList.remove('hidden');
+        if(item.type === 'L') {
+            document.getElementById('audio-ui').classList.remove('hidden');
+            document.getElementById('test-ui').classList.add('hidden');
+            document.getElementById('nav-test-btns').classList.add('hidden');
+            renderReading(item.body);
+        } else {
+            document.getElementById('audio-ui').classList.add('hidden');
+            document.getElementById('test-ui').classList.remove('hidden');
+            document.getElementById('nav-test-btns').classList.remove('hidden');
+            lastRawBody = item.body;
+            initTest(item.body);
+        }
+    }
+
+    function renderReading(txt) {
+        document.getElementById('reader-display').innerHTML = txt.split(/\s+/).map(w => `<span class="word" onclick="trans(this)">${w}</span>`).join(' ');
+    }
+
+    function initTest(raw) {
+        curSession = raw.split('\n').filter(l => l.includes('|')).map(line => {
+            let p = line.split('|').map(x => x.trim());
+            let opts = [];
+            for(let i=1; i < p.length; i+=2) {
+                opts.push({ txt: p[i], expl: p[i+1] || "", isCor: i===1 });
+            }
+            return { q: p[0], opts: opts };
+        });
+        curIdx = 0; score = 0; showQ();
+    }
+
+    function showQ() {
+        if(curIdx >= curSession.length) {
+            document.getElementById('reader-display').innerHTML = `<h2>Scor: ${score}/${curSession.length}</h2>`;
+            document.getElementById('test-ui').innerHTML = `<button class="lvl-btn active-lvl" style="width:100%" onclick="initTest(lastRawBody)">RESTARTEAZĂ</button>`;
+            return;
+        }
+        document.getElementById('test-counter').innerText = `${curIdx+1}/${curSession.length}`;
+        let itm = curSession[curIdx];
+        let qHtml = itm.q.split(' ').map(w => w === '___' ? '<span id="slot" class="blank-space">___</span>' : `<span class="word" onclick="trans(this)">${w}</span>`).join(' ');
+        document.getElementById('reader-display').innerHTML = `<h3>${qHtml}</h3>`;
+
+        let html = [...itm.opts].sort(() => 0.5 - Math.random()).map((o, i) => `
+            <div class="test-opt" id="opt-${i}" onclick="evalAns(${i}, ${o.isCor}, '${o.txt.replace(/'/g, "\\'")}')">
+                <div style="pointer-events:none;"><b>${String.fromCharCode(65+i)}.</b> ${o.txt}</div>
+                <div class="expl-text" id="expl-${i}"><b>${o.isCor?'✅':'❌'}</b> ${o.expl}</div>
+            </div>
+        `).join('');
+        document.getElementById('test-ui').innerHTML = html;
+    }
+
+    function evalAns(idx, isCor, txt) {
+        if(event.target.classList.contains('word')) return;
+        document.querySelectorAll('.test-opt').forEach(el => {
+            el.classList.remove('ans-correct', 'ans-wrong');
+            el.querySelector('.expl-text').style.display = 'none';
+        });
+        let optEl = document.getElementById(`opt-${idx}`);
+        optEl.classList.add(isCor ? 'ans-correct' : 'ans-wrong');
+        optEl.querySelector('.expl-text').style.display = 'block';
+        let slot = document.getElementById('slot');
+        if(slot) { slot.innerText = txt; slot.style.color = isCor ? "#28a745" : "#dc3545"; }
+        if(isCor) score++;
+    }
+
+    function nextQ() { if(curIdx < curSession.length - 1) { curIdx++; showQ(); } else { curIdx++; showQ(); } }
+    function prevQ() { if(curIdx > 0) { curIdx--; showQ(); } }
+
+    async function trans(el) {
+        event.stopPropagation();
+        document.querySelectorAll('.word').forEach(w => w.classList.remove('highlight-green'));
+        el.classList.add('highlight-green');
+        let w = el.innerText.replace(/[.,!?;:]/g, '');
+        document.getElementById('trans-box').innerText = "Traducere...";
+        try {
+            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ro&dt=t&q=${encodeURIComponent(w)}`);
+            let data = await res.json();
+            document.getElementById('trans-box').innerText = data[0][0][0];
+        } catch(e) { document.getElementById('trans-box').innerText = "Eroare"; }
+    }
+
+    function playAll() { synth.cancel(); let ut = new SpeechSynthesisUtterance(document.getElementById('reader-display').innerText); ut.lang = 'de-DE'; ut.rate = config.rate; synth.speak(ut); }
+    function playSelect() { let t = window.getSelection().toString(); if(!t) return; synth.cancel(); let ut = new SpeechSynthesisUtterance(t); ut.lang = 'de-DE'; ut.rate = config.rate; synth.speak(ut); }
+    function pauseAudio() { synth.pause(); }
+    function stopAudio() { synth.cancel(); }
+    function goHome() { document.getElementById('lvl-screen').classList.add('hidden'); document.getElementById('work-screen').classList.add('hidden'); document.getElementById('home-screen').classList.remove('hidden'); stopAudio(); }
+    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.remove('hidden'); stopAudio(); }
+    function toggleSet() { document.getElementById('set-panel').classList.toggle('open'); }
+    function saveData() { let l = document.getElementById('in-lvl').value, t = document.getElementById('in-type').value, title = document.getElementById('in-title').value, body = document.getElementById('in-body').value; if(!title || !body) return; db[l].push({ title, body, type: t }); localStorage.setItem('gm_db_v3', JSON.stringify(db)); renderList(); }
+    function delItem(l, idx) { if(confirm("Ștergi?")) { db[l].splice(idx, 1); localStorage.setItem('gm_db_v3', JSON.stringify(db)); renderList(); } }
+</script>
+</body>
+</html>
