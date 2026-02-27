@@ -2,249 +2,221 @@
 <html lang="ro">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Germana Expert ULTIMATE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Germana Expert</title>
     <style>
-        :root { 
-            --bg-app: #f0f2f5; --bg-card: #ffffff; 
-            --f-size-read: 24px; --f-size-trans: 18px;
-            --main-green: #28a745;
+        :root {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --text-main: #ffffff;
+            --text-dim: #b3b3b3;
+            --accent-blue: #3b82f6;
+            --correct-green: #22c55e;
+            --wrong-red: #ef4444;
         }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-app); padding-top: 75px; transition: 0.3s; }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Progres */
+        .header { margin-bottom: 30px; }
+        .progress-bar {
+            height: 6px;
+            background: #333;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--accent-blue);
+            transition: width 0.3s ease;
+        }
+        .stats {
+            text-align: right;
+            font-size: 14px;
+            color: var(--text-dim);
+            margin-top: 8px;
+        }
+
+        /* Intrebare */
+        .question-text {
+            font-size: 20px;
+            font-weight: 500;
+            margin-bottom: 30px;
+            line-height: 1.5;
+        }
+
+        /* Optiuni */
+        .options-container { display: flex; flex-direction: column; gap: 12px; }
         
-        #top-bar { position: fixed; top: 0; width: 100%; height: 70px; background: var(--main-green); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-weight: bold; }
-        .nav-btns { display: flex; gap: 15px; align-items: center; }
-        .nav-icon { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+        .option {
+            background: var(--bg-card);
+            border: 2px solid transparent;
+            border-radius: 14px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+        }
 
-        .grid-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 15px; }
-        .lvl-btn { border: none; padding: 18px 5px; border-radius: 15px; color: white; font-weight: bold; cursor: pointer; font-size: 18px; background: #6c757d; box-shadow: 0 4px 0 #4a5157; }
-        .lvl-btn:active { transform: translateY(3px); box-shadow: none; }
-        .active-lvl { background: var(--main-green) !important; box-shadow: 0 4px 0 #1e7e34 !important; }
+        .option-header { display: flex; align-items: flex-start; }
+        .option-prefix { color: var(--text-dim); margin-right: 12px; font-weight: bold; }
 
-        .card { background: var(--bg-card); margin: 12px; padding: 20px; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
-        .hidden { display: none !important; }
+        /* Stari Raspunsuri */
+        .option.correct { border-color: var(--correct-green); box-shadow: 0 0 10px rgba(34, 197, 94, 0.2); }
+        .option.wrong { border-color: var(--wrong-red); }
 
-        /* Stil special pentru modul Test */
-        .test-mode body { padding-top: 20px; }
-        .test-mode #top-bar { display: none; }
+        .feedback {
+            margin-top: 10px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+        }
+        .option.correct .feedback { display: block; background: rgba(34, 197, 94, 0.1); color: #4ade80; }
+        .option.wrong .feedback { display: block; background: rgba(239, 68, 68, 0.1); color: #f87171; }
 
-        #reader-display { line-height: 1.8; font-size: var(--f-size-read); min-height: 250px; }
-        .word { cursor: pointer; padding: 0 3px; border-radius: 5px; display: inline-block; transition: 0.2s; }
-        .highlight-green { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
-        
-        #trans-box { min-height: 50px; background: #e9f7ef; color: #155724; font-weight: bold; font-size: var(--f-size-trans); text-align: center; margin-bottom: 15px; padding: 10px; border-radius: 10px; border-left: 5px solid var(--main-green); }
-
-        .test-opt { display: flex; align-items: center; background: #f8f9fa; border: 2px solid #eee; border-radius: 12px; margin: 10px 0; padding: 15px; cursor: pointer; font-size: 18px; }
-        .ans-correct { background: #d4edda !important; border-color: #28a745 !important; }
-        .ans-wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
-
-        /* Footer navigare test */
-        .test-nav-footer { display: flex; gap: 10px; margin-top: 25px; }
-        .btn-footer { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
-        .btn-blue { background: #a3bffa; color: #1e3a8a; }
-        .btn-gray { background: #6c757d; color: white; }
-
-        /* SIDE PANEL - Redus cu 6% */
-        .side-panel { position: fixed; top: 0; right: 0; width: 84.6%; height: 100%; background: white; z-index: 2000; padding: 23.5px; box-shadow: -5px 0 20px rgba(0,0,0,0.2); transform: translateX(100%); transition: 0.4s; overflow-y: auto; }
-        .side-panel.open { transform: translateX(0); }
-        .side-panel label { display: block; margin-top: 14.1px; font-weight: bold; font-size: 15px; }
-        .side-panel input, .side-panel select, .side-panel textarea { width: 100%; padding: 11.2px; margin-top: 4.7px; border-radius: 9px; border: 1px solid #ddd; font-size: 15px; }
+        /* Buton Inainte */
+        .btn-next {
+            margin-top: auto;
+            background: #222;
+            color: #555;
+            border: none;
+            padding: 18px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: all 0.3s;
+            margin-top: 40px;
+        }
+        .btn-next.active {
+            background: #93c5fd;
+            color: #000;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 
-<div id="top-bar">
-    <div class="nav-btns">
-        <button class="nav-icon" onclick="goHome()">⬅️</button>
-        <button class="nav-icon" onclick="history.forward()">➡️</button>
-    </div>
-    <span id="nav-title">GERMANA MASTER</span>
-    <button onclick="toggleSet()" style="background:none; border:none; color:white; font-size:28px;">⚙️</button>
-</div>
-
-<div id="home-screen">
-    <div id="resume-container" style="padding: 0 15px;" class="hidden">
-        <button class="lvl-btn" style="width:100%; background:#6c757d; margin-bottom: 15px;" onclick="resumeTest()">🔄 REIA DE UNDE AI RĂMAS</button>
-    </div>
-    <div class="grid-levels">
-        <button class="lvl-btn" onclick="openLvl('A1')">A1</button>
-        <button class="lvl-btn" onclick="openLvl('A2')">A2</button>
-        <button class="lvl-btn" onclick="openLvl('B1')">B1</button>
-        <button class="lvl-btn" onclick="openLvl('B2')">B2</button>
-        <button class="lvl-btn" onclick="openLvl('C1')">C1</button>
-        <button class="lvl-btn" onclick="openLvl('C2')">C2</button>
-    </div>
-</div>
-
-<div id="lvl-screen" class="card hidden">
-    <div style="display:flex; gap:10px; margin-bottom:20px;">
-        <button class="lvl-btn active-lvl" style="flex:2" onclick="switchTab('L')">Lecturi</button>
-        <button class="lvl-btn active-lvl" style="flex:2" onclick="switchTab('T')">Teste</button>
-    </div>
-    <div id="content-list"></div>
-    <button class="lvl-btn" style="width:100%; margin-top:10px; background:#6c757d" onclick="goHome()">⬅️ Înapoi</button>
-</div>
-
-<div id="work-screen" class="card hidden">
-    <div id="audio-ui" class="audio-bar hidden" style="display:flex; justify-content:center; gap:15px; padding-bottom:15px;">
-        <button class="nav-icon" style="background:var(--main-green)" onclick="playAll()">▶️</button>
-        <button class="nav-icon" style="background:var(--main-green)" onclick="stopAudio()">⏹️</button>
-    </div>
-    <div id="trans-box">Apasă pe cuvinte pentru traducere</div>
-    <div id="reader-display"></div>
-    <div id="test-ui" class="hidden"></div>
-    
-    <div id="default-footer">
-        <button class="lvl-btn" style="width:100%; margin-top:25px; background:#6c757d" onclick="backToList()">⬅️ Înapoi la listă</button>
+<div class="container">
+    <div class="header">
+        <div class="progress-bar"><div id="progress-fill"></div></div>
+        <div class="stats" id="counter">1 / 3</div>
     </div>
 
-    <div id="test-nav-ui" class="test-nav-footer hidden">
-        <button class="btn-footer btn-gray" onclick="prevQ()">Înapoi</button>
-        <button class="btn-footer btn-blue" onclick="nextQ()">Înainte</button>
-        <button class="btn-footer btn-gray" style="flex:0.5" onclick="backToList()">✖</button>
+    <div id="quiz-content">
+        <div class="question-text" id="question">Încarcare...</div>
+        <div class="options-container" id="options"></div>
     </div>
-</div>
 
-<div id="set-panel" class="side-panel">
-    <h3>⚙️ Setări</h3>
-    <label>Culoare Fundal:</label>
-    <input type="color" id="cfg-bg" onchange="applyCfg()">
-    <label>Font Lectură: <span id="val-f1">24</span>px</label>
-    <input type="range" id="cfg-f1" min="14" max="40" value="24" oninput="applyCfg()">
-    <button class="lvl-btn active-lvl" style="width:100%; margin-top:20px;" onclick="toggleSet()">ÎNCHIDE</button>
+    <button class="btn-next" id="next-btn" onclick="handleNext()">Înainte</button>
 </div>
 
 <script>
-    let db = JSON.parse(localStorage.getItem('gm_db_v3') || '{"A1":[],"A2":[],"B1":[],"B2":[],"C1":[],"C2":[]}');
-    let config = JSON.parse(localStorage.getItem('gm_config') || '{"bg":"#f0f2f5","font":"24"}');
-    let curLvl = '', curTab = 'L', curSession = [], curIdx = 0, synth = window.speechSynthesis;
-    let lastRawBody = '';
+    const questions = [
+        {
+            q: "Wir müssen uns intensiv ___ die Prüfung vorbereiten.",
+            options: [
+                { text: "über", correct: false },
+                { text: "an", correct: false },
+                { text: "für", correct: false, info: "Deși în română spunem 'pentru', în germană 'vorbereiten' nu se folosește cu 'für'." },
+                { text: "auf", correct: true, info: "Verbul 'sich vorbereiten' cere întotdeauna prepoziția 'auf' (Acuzativ) pentru evenimente viitoare." }
+            ]
+        },
+        {
+            q: "Ich ___ mich sehr darüber, dass du gekommen bist.",
+            options: [
+                { text: "lache", correct: false },
+                { text: "denke", correct: false },
+                { text: "freue", correct: true, info: "'Sich freuen über' (Acuzativ) se folosește pentru ceva ce s-a întâmplat deja." },
+                { text: "erinnere", correct: false }
+            ]
+        },
+        {
+            q: "Er hat mir versprochen, dass er mir ___.",
+            options: [
+                { text: "hat geholfen", correct: false },
+                { text: "hilft", correct: true, info: "În propozițiile cu 'dass', verbul conjugat stă la final. Prezentul indică o promisiune viitoare." },
+                { text: "helfen", correct: false },
+                { text: "geholfen hat", correct: false, info: "Timpul trecut nu se potrivește cu sensul de a promite ceva viitor aici." }
+            ]
+        }
+    ];
 
-    window.onload = () => { loadCfg(); };
+    let currentIdx = 0;
+    let answered = false;
 
-    function loadCfg() {
-        document.getElementById('cfg-bg').value = config.bg;
-        document.getElementById('cfg-f1').value = config.font;
-        applyCfg(false);
-    }
-
-    function applyCfg(save = true) {
-        config.bg = document.getElementById('cfg-bg').value;
-        config.font = document.getElementById('cfg-f1').value;
-        document.body.style.background = config.bg;
-        document.documentElement.style.setProperty('--f-size-read', config.font + 'px');
-        document.getElementById('val-f1').innerText = config.font;
-        if(save) localStorage.setItem('gm_config', JSON.stringify(config));
-    }
-
-    function openLvl(l) {
-        curLvl = l;
-        document.getElementById('home-screen').classList.add('hidden');
-        document.getElementById('lvl-screen').classList.remove('hidden');
-        document.getElementById('nav-title').innerText = "Nivel " + l;
-        switchTab('L');
-    }
-
-    function switchTab(t) { curTab = t; renderList(); }
-
-    function renderList() {
-        let container = document.getElementById('content-list');
-        let items = db[curLvl].filter(i => i.type === curTab);
-        container.innerHTML = items.map((item, idx) => `
-            <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #eee;">
-                <span onclick="startWork('${curLvl}', ${db[curLvl].indexOf(item)})" style="cursor:pointer; flex:1; font-weight:bold;">${item.title}</span>
-            </div>
-        `).join('') || '<p style="text-align:center;">Niciun material adăugat.</p>';
-    }
-
-    function startWork(l, idx) {
-        let item = db[l][idx];
-        document.getElementById('lvl-screen').classList.add('hidden');
-        document.getElementById('work-screen').classList.remove('hidden');
+    function loadQuestion() {
+        const qData = questions[currentIdx];
+        answered = false;
         
-        if(item.type === 'L') {
-            document.documentElement.classList.remove('test-mode');
-            document.getElementById('audio-ui').classList.remove('hidden');
-            document.getElementById('test-ui').classList.add('hidden');
-            document.getElementById('test-nav-ui').classList.add('hidden');
-            document.getElementById('default-footer').classList.remove('hidden');
-            renderReading(item.body);
-        } else {
-            document.documentElement.classList.add('test-mode');
-            document.getElementById('audio-ui').classList.add('hidden');
-            document.getElementById('test-ui').classList.remove('hidden');
-            document.getElementById('test-nav-ui').classList.remove('hidden');
-            document.getElementById('default-footer').classList.add('hidden');
-            lastRawBody = item.body;
-            initTest(item.body);
-        }
-    }
-
-    function renderReading(txt) {
-        document.getElementById('reader-display').innerHTML = txt.split(/\s+/).map(w => `<span class="word" onclick="trans(this)">${w}</span>`).join(' ');
-    }
-
-    function initTest(raw) {
-        curSession = raw.split('\n').filter(l => l.includes('|')).map(line => {
-            let p = line.split('|').map(x => x.trim());
-            return { q: p[0], cor: p[1], all: p.slice(1) };
-        });
-        curIdx = 0;
-        showQ();
-    }
-
-    function showQ() {
-        if(curIdx >= curSession.length) {
-            document.getElementById('reader-display').innerHTML = "<h2>Test Finalizat!</h2>";
-            document.getElementById('test-ui').innerHTML = "";
-            return;
-        }
-        let itm = curSession[curIdx];
-        document.getElementById('reader-display').innerHTML = `<h3>${itm.q}</h3>`;
-        let html = itm.all.sort(() => 0.5 - Math.random()).map(o => `
-            <div class="test-opt" onclick="evalAns(this, '${o}', '${itm.cor}')">${o}</div>
+        document.getElementById('question').innerText = `${currentIdx + 1}. ${qData.q}`;
+        document.getElementById('counter').innerText = `${currentIdx + 1} / ${questions.length}`;
+        document.getElementById('progress-fill').style.width = `${((currentIdx + 1) / questions.length) * 100}%`;
+        
+        const optionsHtml = qData.options.map((opt, i) => `
+            <div class="option" onclick="checkAnswer(this, ${opt.correct})">
+                <div class="option-header">
+                    <span class="option-prefix">${String.fromCharCode(65 + i)}.</span>
+                    <span>${opt.text}</span>
+                </div>
+                ${opt.info ? `<div class="feedback"><strong>${opt.correct ? '✓ Răspuns corect' : '✕ Nu chiar'}</strong><br>${opt.info}</div>` : ''}
+            </div>
         `).join('');
-        document.getElementById('test-ui').innerHTML = html;
+        
+        document.getElementById('options').innerHTML = optionsHtml;
+        document.getElementById('next-btn').classList.remove('active');
     }
 
-    function evalAns(el, sel, cor) {
-        document.querySelectorAll('.test-opt').forEach(o => o.classList.remove('ans-correct', 'ans-wrong'));
-        if(sel === cor) el.classList.add('ans-correct');
-        else el.classList.add('ans-wrong');
+    window.checkAnswer = function(el, isCorrect) {
+        if (answered) return;
+        answered = true;
+
+        // Marcam raspunsul ales
+        if (isCorrect) {
+            el.classList.add('correct');
+        } else {
+            el.classList.add('wrong');
+            // Aratam si care era cel corect
+            const allOptions = document.querySelectorAll('.option');
+            allOptions.forEach((opt, idx) => {
+                if (questions[currentIdx].options[idx].correct) opt.classList.add('correct');
+            });
+        }
+
+        document.getElementById('next-btn').classList.add('active');
     }
 
-    function nextQ() { if(curIdx < curSession.length - 1) { curIdx++; showQ(); } }
-    function prevQ() { if(curIdx > 0) { curIdx--; showQ(); } }
-
-    async function trans(el) {
-        document.querySelectorAll('.word').forEach(w => w.classList.remove('highlight-green'));
-        el.classList.add('highlight-green');
-        let w = el.innerText.replace(/[.,!?;:]/g, '');
-        document.getElementById('trans-box').innerText = "Traducere...";
-        try {
-            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ro&dt=t&q=${w}`);
-            let data = await res.json();
-            document.getElementById('trans-box').innerText = data[0][0][0];
-        } catch(e) { document.getElementById('trans-box').innerText = "Eroare"; }
+    window.handleNext = function() {
+        if (!answered) return;
+        if (currentIdx < questions.length - 1) {
+            currentIdx++;
+            loadQuestion();
+        } else {
+            alert("Felicitări! Ai terminat testul.");
+        }
     }
 
-    function playAll() { synth.cancel(); let ut = new SpeechSynthesisUtterance(document.getElementById('reader-display').innerText); ut.lang = 'de-DE'; synth.speak(ut); }
-    function stopAudio() { synth.cancel(); }
-    function goHome() { 
-        document.documentElement.classList.remove('test-mode');
-        document.getElementById('lvl-screen').classList.add('hidden'); 
-        document.getElementById('work-screen').classList.add('hidden'); 
-        document.getElementById('home-screen').classList.remove('hidden'); 
-        stopAudio(); 
-    }
-    function backToList() { 
-        document.documentElement.classList.remove('test-mode');
-        document.getElementById('work-screen').classList.add('hidden'); 
-        document.getElementById('lvl-screen').classList.remove('hidden'); 
-        stopAudio(); 
-    }
-    function toggleSet() { document.getElementById('set-panel').classList.toggle('open'); }
+    loadQuestion();
 </script>
+
 </body>
 </html>
