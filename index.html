@@ -3,225 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Germana Expert Pro</title>
+    <title>Germana Expert ULTIMATE</title>
     <style>
         :root {
-            --bg-app: #121212;
-            --bg-card: #1e1e1e;
+            --bg-app: #f0f2f5;
+            --bg-card: #ffffff;
             --main-green: #28a745;
-            --accent-blue: #3b82f6;
-            --text-white: #ffffff;
-            --text-gray: #b3b3b3;
+            --accent-blue: #007bff;
+            --text-main: #333;
+            --f-size-read: 24px;
         }
 
-        body {
-            background-color: var(--bg-app);
-            color: var(--text-white);
-            font-family: 'Segoe UI', sans-serif;
-            margin: 0;
-            overflow-x: hidden;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-app); color: var(--text-main); margin: 0; padding-top: 60px; transition: background 0.3s; }
 
-        /* Top Bar & Settings */
-        #top-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 20px;
-            background: #1a1a1a;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .settings-icon {
-            font-size: 24px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            color: white;
-        }
+        /* Top Bar & Translation Popover */
+        #top-bar { position: fixed; top: 0; width: 100%; height: 60px; background: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 1000; box-sizing: border-box; }
+        #translation-display { font-weight: bold; color: var(--accent-blue); font-size: 18px; flex-grow: 1; text-align: center; }
 
         /* Pagini */
         .page { display: none; padding: 20px; animation: fadeIn 0.3s; }
         .page.active { display: block; }
-
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* Grile nivele (A1, A2, etc) */
-        .grid-levels {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
+        /* Grid Nivele */
+        .grid-levels { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .lvl-btn { border: none; padding: 30px; border-radius: 15px; font-size: 22px; font-weight: bold; cursor: pointer; color: white; background: var(--main-green); }
 
-        .lvl-btn {
-            background: var(--bg-card);
-            border: 1px solid #333;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            cursor: pointer;
-        }
+        /* Lectura & Interactivitate */
+        .word { cursor: pointer; display: inline-block; padding: 0 2px; border-radius: 4px; }
+        .word:active { background: #d1e7ff; }
+        .story-container { background: var(--bg-card); padding: 20px; border-radius: 15px; font-size: var(--f-size-read); line-height: 1.6; }
 
-        /* Carduri Actiuni (Lectura / Teste) */
-        .action-card {
-            background: var(--bg-card);
-            margin-bottom: 15px;
-            padding: 20px;
-            border-radius: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .btn-action {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .btn-lectura { background: #555; color: white; }
-        .btn-teste { background: var(--accent-blue); color: white; }
-
-        /* Setari Overlay */
-        #settings-page {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-app);
-            z-index: 200;
-            padding: 20px;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 15px 0;
-            border-bottom: 1px solid #333;
-        }
-
-        /* Toggle Switch */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 40px;
-            height: 20px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #444;
-            transition: .4s;
-            border-radius: 20px;
-        }
-        input:checked + .slider { background-color: var(--main-green); }
-
-        .back-btn { background: none; border: none; color: var(--accent-blue); font-size: 16px; margin-bottom: 20px; cursor: pointer; }
+        /* Setari & Backup (Ca in poza ta) */
+        .settings-container { background: white; padding: 20px; border-radius: 20px; max-width: 500px; margin: auto; }
+        .s-item { margin-bottom: 20px; }
+        input[type="range"], select, input[type="text"], textarea { width: 100%; margin-top: 8px; padding: 10px; border-radius: 8px; border: 1px solid #ddd; box-sizing: border-box; }
+        .btn-save { background: var(--main-green); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-backup { background: var(--accent-blue); color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
     <div id="top-bar">
-        <span id="nav-title" style="font-weight: bold;">Germana Expert</span>
-        <button class="settings-icon" onclick="showPage('settings-page')">⚙️</button>
+        <button onclick="goHome()" style="background:none; border:none; font-size:20px;">🏠</button>
+        <div id="translation-display">Atinge un cuvânt...</div>
+        <button onclick="showPage('settings-page')" style="background:none; border:none; font-size:20px;">⚙️</button>
     </div>
 
-    <div id="levels-page" class="page active">
-        <h3>Alege nivelul:</h3>
-        <div class="grid-levels">
-            <div class="lvl-btn" onclick="selectLevel('A1')">A1</div>
-            <div class="lvl-btn" onclick="selectLevel('A2')">A2</div>
-            <div class="lvl-btn" onclick="selectLevel('B1')">B1</div>
-            <div class="lvl-btn" onclick="selectLevel('B2')">B2</div>
+    <div id="home-page" class="page active">
+        <div class="grid-levels" id="levels-grid">
+            <button class="lvl-btn" onclick="openLevel('A1')">A1</button>
+            <button class="lvl-btn" onclick="openLevel('A2')">A2</button>
         </div>
     </div>
 
-    <div id="actions-page" class="page">
-        <button class="back-btn" onclick="showPage('levels-page')">← Înapoi la nivele</button>
-        <h2 id="selected-level-title">Nivel A1</h2>
-        
-        <div class="action-card">
-            <span>Vocabular de bază</span>
-            <div>
-                <button class="btn-action btn-lectura" onclick="alert('Deschid Lectura...')">Lectură</button>
-                <button class="btn-action btn-teste" onclick="startQuiz()">Teste</button>
-            </div>
-        </div>
-
-        <div class="action-card">
-            <span>Verbe neregulate</span>
-            <div>
-                <button class="btn-action btn-lectura">Lectură</button>
-                <button class="btn-action btn-teste">Teste</button>
-            </div>
-        </div>
+    <div id="read-page" class="page">
+        <h2 id="read-title">Lectură</h2>
+        <div class="story-container" id="story-content"></div>
     </div>
 
     <div id="settings-page" class="page">
-        <button class="back-btn" onclick="closeSettings()">← Înapoi</button>
-        <h2>Setări</h2>
-        
-        <div class="setting-item">
-            <span>Mod Noapte</span>
-            <label class="switch">
-                <input type="checkbox" checked onchange="toggleDarkMode()">
-                <span class="slider"></span>
-            </label>
-        </div>
+        <div class="settings-container">
+            <h3>⚙️ Setări & Backup</h3>
+            
+            <div class="s-item">
+                <label>Culoare Fundal Butoane:</label>
+                <input type="color" id="color-picker" onchange="updateColors(this.value)" style="height: 40px;">
+            </div>
 
-        <div class="setting-item">
-            <span>Notificări zilnice</span>
-            <label class="switch">
-                <input type="checkbox" checked>
-                <span class="slider"></span>
-            </label>
-        </div>
+            <div class="s-item">
+                <label>Font Lectură: <span id="font-val">24px</span></label>
+                <input type="range" min="16" max="40" value="24" oninput="updateFont(this.value)">
+            </div>
 
-        <div class="setting-item" onclick="alert('Versiune 1.0.4')">
-            <span>Versiune Aplicație</span>
-            <span style="color: #666;">1.0.4</span>
-        </div>
+            <div class="s-item">
+                <label>Viteză Voce:</label>
+                <input type="range" min="0.5" max="1.5" step="0.1" value="1" id="voice-speed">
+            </div>
 
-        <div class="setting-item" style="color: #ff4444; margin-top: 30px;" onclick="location.reload()">
-            <span>Resetează Progresul</span>
+            <hr>
+            <h3>➕ Adaugă Material</h3>
+            <select id="add-lvl"><option>A1</option><option>A2</option></select>
+            <select id="add-type"><option value="read">Lectură</option><option value="test">Test</option></select>
+            <input type="text" id="add-title" placeholder="Titlu...">
+            <textarea id="add-content" rows="4" placeholder="Conținut (pentru traducere foloseste formatul: cuvânt|traducere)"></textarea>
+            
+            <button class="btn-save" onclick="saveContent()">💾 SALVEAZĂ</button>
+            <button class="btn-backup" onclick="exportData()">📩 SALVEAZĂ BACKUP</button>
+            
+            <div class="s-item" style="margin-top:15px;">
+                <label>Restaurare Date (.json):</label>
+                <input type="file" id="import-file" onchange="importData(event)">
+            </div>
+
+            <button onclick="goHome()" style="width:100%; padding:15px; margin-top:20px; border-radius:10px; background:#333; color:white; border:none;">ÎNCHIDE</button>
         </div>
     </div>
 
     <script>
-        function showPage(pageId) {
+        // Baza de date locală
+        let appData = JSON.parse(localStorage.getItem('germanaData')) || {
+            levels: { 'A1': [], 'A2': [] },
+            settings: { color: '#28a745', fontSize: 24 }
+        };
+
+        function showPage(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
+            document.getElementById(id).classList.add('active');
+        }
+
+        function goHome() { showPage('home-page'); }
+
+        // Funcția de procesare text pentru dicționar
+        function processText(text) {
+            return text.split(' ').map(rawWord => {
+                const [word, trans] = rawWord.split('|');
+                return `<span class="word" onclick="handleWord('${word}', '${trans || '...'}')">${word}</span>`;
+            }).join(' ');
+        }
+
+        function handleWord(word, trans) {
+            document.getElementById('translation-display').innerText = `${word} = ${trans}`;
+            speak(word);
+        }
+
+        function speak(text) {
+            const msg = new SpeechSynthesisUtterance();
+            msg.text = text;
+            msg.lang = 'de-DE';
+            msg.rate = document.getElementById('voice-speed').value;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function saveContent() {
+            const lvl = document.getElementById('add-lvl').value;
+            const type = document.getElementById('add-type').value;
+            const title = document.getElementById('add-title').value;
+            const content = document.getElementById('add-content').value;
+
+            appData.levels[lvl].push({ type, title, content });
+            localStorage.setItem('germanaData', JSON.stringify(appData));
+            alert("Salvat cu succes!");
+        }
+
+        function openLevel(lvl) {
+            const content = appData.levels[lvl][0]; // Deschide prima lectură adăugată pentru demo
+            if(!content) return alert("Niciun material adăugat pentru " + lvl);
             
-            // Ascundem top bar-ul daca suntem in setari
-            document.getElementById('top-bar').style.display = (pageId === 'settings-page') ? 'none' : 'flex';
+            document.getElementById('read-title').innerText = content.title;
+            document.getElementById('story-content').innerHTML = processText(content.content);
+            showPage('read-page');
         }
 
-        function selectLevel(lvl) {
-            document.getElementById('selected-level-title').innerText = "Nivel " + lvl;
-            showPage('actions-page');
+        // --- Setări & Backup ---
+        function updateColors(color) {
+            appData.settings.color = color;
+            document.querySelectorAll('.lvl-btn').forEach(b => b.style.background = color);
+            localStorage.setItem('germanaData', JSON.stringify(appData));
         }
 
-        function closeSettings() {
-            showPage('levels-page');
+        function updateFont(size) {
+            document.getElementById('font-val').innerText = size + "px";
+            document.getElementById('story-content').style.fontSize = size + "px";
         }
 
-        function toggleDarkMode() {
-            // Logica simpla pentru demo
-            const isDark = document.body.style.backgroundColor !== 'white';
-            document.body.style.backgroundColor = isDark ? 'white' : '#121212';
-            document.body.style.color = isDark ? 'black' : 'white';
+        function exportData() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "backup_germana.json");
+            dlAnchorElem.click();
         }
 
-        function startQuiz() {
-            alert("Aici se încarcă quiz-ul pe care l-am făcut anterior!");
-            // Poți redirecționa către pagina de test sau să încarci quiz-ul aici
+        function importData(event) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                appData = JSON.parse(e.target.result);
+                localStorage.setItem('germanaData', JSON.stringify(appData));
+                location.reload();
+            };
+            reader.readAsText(event.target.files[0]);
         }
+
+        // Aplicare setări la pornire
+        if(appData.settings.color) updateColors(appData.settings.color);
     </script>
 </body>
 </html>
