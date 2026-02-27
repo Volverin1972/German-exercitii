@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Germana Expert ULTIMATE - Final Fix</title>
+    <title>Germana Expert ULTIMATE</title>
     <style>
         :root { 
             --bg-app: #f0f2f5; --bg-card: #ffffff; 
-            --f-size-read: 20px; --f-size-trans: 18px;
+            --f-size-read: 24px; --f-size-trans: 18px;
             --main-green: #28a745;
         }
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { font-family: 'Segoe UI', sans-serif; margin: 0; background: var(--bg-app); padding-top: 75px; transition: 0.3s; }
         
         #top-bar { position: fixed; top: 0; width: 100%; height: 70px; background: var(--main-green); color: white; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); font-weight: bold; }
@@ -25,22 +25,31 @@
         .card { background: var(--bg-card); margin: 12px; padding: 20px; border-radius: 18px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }
         .hidden { display: none !important; }
 
-        .audio-bar { position: sticky; top: 70px; background: white; z-index: 900; display: flex; justify-content: center; gap: 20px; padding: 10px; border-bottom: 2px solid #eee; margin: -20px -20px 20px -20px; border-radius: 18px 18px 0 0; }
-        .btn-circle { width: 45px; height: 45px; border-radius: 50%; border: none; background: #f8f9fa; cursor: pointer; font-size: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* Stil special pentru modul Test */
+        .test-mode body { padding-top: 20px; }
+        .test-mode #top-bar { display: none; }
 
         #reader-display { line-height: 1.8; font-size: var(--f-size-read); min-height: 250px; }
         .word { cursor: pointer; padding: 0 3px; border-radius: 5px; display: inline-block; transition: 0.2s; }
-        .highlight-green { background: #d4edda !important; color: #155724 !important; font-weight: bold; border: 1px solid #c3e6cb; }
+        .highlight-green { background: #d4edda !important; color: #155724 !important; font-weight: bold; }
         
         #trans-box { min-height: 50px; background: #e9f7ef; color: #155724; font-weight: bold; font-size: var(--f-size-trans); text-align: center; margin-bottom: 15px; padding: 10px; border-radius: 10px; border-left: 5px solid var(--main-green); }
 
         .test-opt { display: flex; align-items: center; background: #f8f9fa; border: 2px solid #eee; border-radius: 12px; margin: 10px 0; padding: 15px; cursor: pointer; font-size: 18px; }
-        .ans-correct { background: #d4edda !important; border-color: #28a745 !important; color: #155724 !important; }
-        .ans-wrong { background: #f8d7da !important; border-color: #dc3545 !important; color: #721c24 !important; }
+        .ans-correct { background: #d4edda !important; border-color: #28a745 !important; }
+        .ans-wrong { background: #f8d7da !important; border-color: #dc3545 !important; }
 
-        .side-panel { position: fixed; top: 0; right: 0; width: 90%; height: 100%; background: white; z-index: 2000; padding: 25px; box-shadow: -5px 0 20px rgba(0,0,0,0.2); transform: translateX(100%); transition: 0.4s; overflow-y: auto; }
+        /* Footer navigare test */
+        .test-nav-footer { display: flex; gap: 10px; margin-top: 25px; }
+        .btn-footer { flex: 1; padding: 15px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; }
+        .btn-blue { background: #a3bffa; color: #1e3a8a; }
+        .btn-gray { background: #6c757d; color: white; }
+
+        /* SIDE PANEL - Redus cu 6% */
+        .side-panel { position: fixed; top: 0; right: 0; width: 84.6%; height: 100%; background: white; z-index: 2000; padding: 23.5px; box-shadow: -5px 0 20px rgba(0,0,0,0.2); transform: translateX(100%); transition: 0.4s; overflow-y: auto; }
         .side-panel.open { transform: translateX(0); }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border-radius: 10px; border: 1px solid #ddd; }
+        .side-panel label { display: block; margin-top: 14.1px; font-weight: bold; font-size: 15px; }
+        .side-panel input, .side-panel select, .side-panel textarea { width: 100%; padding: 11.2px; margin-top: 4.7px; border-radius: 9px; border: 1px solid #ddd; font-size: 15px; }
     </style>
 </head>
 <body>
@@ -55,6 +64,9 @@
 </div>
 
 <div id="home-screen">
+    <div id="resume-container" style="padding: 0 15px;" class="hidden">
+        <button class="lvl-btn" style="width:100%; background:#6c757d; margin-bottom: 15px;" onclick="resumeTest()">🔄 REIA DE UNDE AI RĂMAS</button>
+    </div>
     <div class="grid-levels">
         <button class="lvl-btn" onclick="openLvl('A1')">A1</button>
         <button class="lvl-btn" onclick="openLvl('A2')">A2</button>
@@ -71,54 +83,55 @@
         <button class="lvl-btn active-lvl" style="flex:2" onclick="switchTab('T')">Teste</button>
     </div>
     <div id="content-list"></div>
+    <button class="lvl-btn" style="width:100%; margin-top:10px; background:#6c757d" onclick="goHome()">⬅️ Înapoi</button>
 </div>
 
 <div id="work-screen" class="card hidden">
-    <div id="audio-ui" class="audio-bar hidden">
-        <button class="btn-circle" onclick="playAll()">▶️</button>
-        <button class="btn-circle" onclick="playSelect()">🎯</button>
-        <button class="btn-circle" onclick="pauseAudio()">⏸️</button>
-        <button class="btn-circle" onclick="stopAudio()">⏹️</button>
+    <div id="audio-ui" class="audio-bar hidden" style="display:flex; justify-content:center; gap:15px; padding-bottom:15px;">
+        <button class="nav-icon" style="background:var(--main-green)" onclick="playAll()">▶️</button>
+        <button class="nav-icon" style="background:var(--main-green)" onclick="stopAudio()">⏹️</button>
     </div>
     <div id="trans-box">Apasă pe cuvinte pentru traducere</div>
     <div id="reader-display"></div>
-    <div id="test-ui" class="hidden" style="margin-top:20px;"></div>
-    <button class="lvl-btn" style="width:100%; margin-top:25px; background:#6c757d" onclick="backToList()">⬅️ Înapoi la listă</button>
+    <div id="test-ui" class="hidden"></div>
+    
+    <div id="default-footer">
+        <button class="lvl-btn" style="width:100%; margin-top:25px; background:#6c757d" onclick="backToList()">⬅️ Înapoi la listă</button>
+    </div>
+
+    <div id="test-nav-ui" class="test-nav-footer hidden">
+        <button class="btn-footer btn-gray" onclick="prevQ()">Înapoi</button>
+        <button class="btn-footer btn-blue" onclick="nextQ()">Înainte</button>
+        <button class="btn-footer btn-gray" style="flex:0.5" onclick="backToList()">✖</button>
+    </div>
 </div>
 
 <div id="set-panel" class="side-panel">
-    <h3>⚙️ Setări & Backup</h3>
+    <h3>⚙️ Setări</h3>
     <label>Culoare Fundal:</label>
     <input type="color" id="cfg-bg" onchange="applyCfg()">
-    <label>Font Lectură: <span id="val-f1">20</span>px</label>
-    <input type="range" id="cfg-f1" min="14" max="40" oninput="applyCfg()">
-    <label>Viteză Voce:</label>
-    <input type="range" id="cfg-rate" min="0.4" max="1.6" step="0.1" value="1" onchange="applyCfg()">
-    <hr>
-    <button class="lvl-btn" style="width:100%; background:#007bff" onclick="doExport()">📥 SALVEAZĂ BACKUP</button>
-    <div style="margin-top:10px;"><label>Restaurare Date (.json):</label><input type="file" id="import-file" accept=".json" onchange="doImport(this)"></div>
-    <button class="lvl-btn" style="width:100%; background:#343a40; margin-top:20px" onclick="toggleSet()">ÎNCHIDE</button>
+    <label>Font Lectură: <span id="val-f1">24</span>px</label>
+    <input type="range" id="cfg-f1" min="14" max="40" value="24" oninput="applyCfg()">
+    <button class="lvl-btn active-lvl" style="width:100%; margin-top:20px;" onclick="toggleSet()">ÎNCHIDE</button>
 </div>
 
 <script>
     let db = JSON.parse(localStorage.getItem('gm_db_v3') || '{"A1":[],"A2":[],"B1":[],"B2":[],"C1":[],"C2":[]}');
-    let mistakes = JSON.parse(localStorage.getItem('gm_mistakes') || '[]');
-    let config = JSON.parse(localStorage.getItem('gm_config') || '{"bg":"#f0f2f5","font":"20","rate":"1"}');
-    let curLvl = '', curTab = 'L', curSession = [], curIdx = 0, score = 0, synth = window.speechSynthesis;
+    let config = JSON.parse(localStorage.getItem('gm_config') || '{"bg":"#f0f2f5","font":"24"}');
+    let curLvl = '', curTab = 'L', curSession = [], curIdx = 0, synth = window.speechSynthesis;
+    let lastRawBody = '';
 
     window.onload = () => { loadCfg(); };
 
     function loadCfg() {
         document.getElementById('cfg-bg').value = config.bg;
         document.getElementById('cfg-f1').value = config.font;
-        document.getElementById('cfg-rate').value = config.rate;
         applyCfg(false);
     }
 
     function applyCfg(save = true) {
         config.bg = document.getElementById('cfg-bg').value;
         config.font = document.getElementById('cfg-f1').value;
-        config.rate = document.getElementById('cfg-rate').value;
         document.body.style.background = config.bg;
         document.documentElement.style.setProperty('--f-size-read', config.font + 'px');
         document.getElementById('val-f1').innerText = config.font;
@@ -140,24 +153,31 @@
         let items = db[curLvl].filter(i => i.type === curTab);
         container.innerHTML = items.map((item, idx) => `
             <div style="padding:15px; background:#fff; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #eee;">
-                <span onclick="startWork('${curLvl}', ${db[curLvl].indexOf(item)})" style="cursor:pointer; flex:1; font-weight:bold;">${curTab==='L'?'📄':'🧠'} ${item.title}</span>
-                <button onclick="delItem('${curLvl}', ${db[curLvl].indexOf(item)})" style="color:#ff4d4d; border:none; background:none; font-weight:bold; padding:10px;">X</button>
+                <span onclick="startWork('${curLvl}', ${db[curLvl].indexOf(item)})" style="cursor:pointer; flex:1; font-weight:bold;">${item.title}</span>
             </div>
-        `).join('') || '<p style="text-align:center;">Gol.</p>';
+        `).join('') || '<p style="text-align:center;">Niciun material adăugat.</p>';
     }
 
     function startWork(l, idx) {
         let item = db[l][idx];
         document.getElementById('lvl-screen').classList.add('hidden');
         document.getElementById('work-screen').classList.remove('hidden');
+        
         if(item.type === 'L') {
+            document.documentElement.classList.remove('test-mode');
             document.getElementById('audio-ui').classList.remove('hidden');
             document.getElementById('test-ui').classList.add('hidden');
+            document.getElementById('test-nav-ui').classList.add('hidden');
+            document.getElementById('default-footer').classList.remove('hidden');
             renderReading(item.body);
         } else {
+            document.documentElement.classList.add('test-mode');
             document.getElementById('audio-ui').classList.add('hidden');
             document.getElementById('test-ui').classList.remove('hidden');
-            initSmartTest(item.body);
+            document.getElementById('test-nav-ui').classList.remove('hidden');
+            document.getElementById('default-footer').classList.add('hidden');
+            lastRawBody = item.body;
+            initTest(item.body);
         }
     }
 
@@ -165,10 +185,42 @@
         document.getElementById('reader-display').innerHTML = txt.split(/\s+/).map(w => `<span class="word" onclick="trans(this)">${w}</span>`).join(' ');
     }
 
+    function initTest(raw) {
+        curSession = raw.split('\n').filter(l => l.includes('|')).map(line => {
+            let p = line.split('|').map(x => x.trim());
+            return { q: p[0], cor: p[1], all: p.slice(1) };
+        });
+        curIdx = 0;
+        showQ();
+    }
+
+    function showQ() {
+        if(curIdx >= curSession.length) {
+            document.getElementById('reader-display').innerHTML = "<h2>Test Finalizat!</h2>";
+            document.getElementById('test-ui').innerHTML = "";
+            return;
+        }
+        let itm = curSession[curIdx];
+        document.getElementById('reader-display').innerHTML = `<h3>${itm.q}</h3>`;
+        let html = itm.all.sort(() => 0.5 - Math.random()).map(o => `
+            <div class="test-opt" onclick="evalAns(this, '${o}', '${itm.cor}')">${o}</div>
+        `).join('');
+        document.getElementById('test-ui').innerHTML = html;
+    }
+
+    function evalAns(el, sel, cor) {
+        document.querySelectorAll('.test-opt').forEach(o => o.classList.remove('ans-correct', 'ans-wrong'));
+        if(sel === cor) el.classList.add('ans-correct');
+        else el.classList.add('ans-wrong');
+    }
+
+    function nextQ() { if(curIdx < curSession.length - 1) { curIdx++; showQ(); } }
+    function prevQ() { if(curIdx > 0) { curIdx--; showQ(); } }
+
     async function trans(el) {
         document.querySelectorAll('.word').forEach(w => w.classList.remove('highlight-green'));
         el.classList.add('highlight-green');
-        let w = el.innerText.replace(/[.,!?;:()]/g, '');
+        let w = el.innerText.replace(/[.,!?;:]/g, '');
         document.getElementById('trans-box').innerText = "Traducere...";
         try {
             let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ro&dt=t&q=${w}`);
@@ -177,97 +229,22 @@
         } catch(e) { document.getElementById('trans-box').innerText = "Eroare"; }
     }
 
-    function initSmartTest(raw) {
-        let pool = raw.split('\n').filter(l => l.includes('|')).map(line => {
-            let p = line.split('|').map(x => x.trim());
-            return { q: p[0], cor: p[1], all: p.slice(1) };
-        });
-        let size = parseInt(prompt("Câte întrebări?", "10")) || 10;
-        let misPool = mistakes.sort(() => 0.5 - Math.random()).slice(0, 2);
-        let fresh = pool.sort(() => 0.5 - Math.random()).slice(0, size - misPool.length);
-        curSession = [...misPool, ...fresh].sort(() => 0.5 - Math.random());
-        curIdx = 0; score = 0; showQ();
-    }
-
-    function showQ() {
-        if(curIdx >= curSession.length) { 
-            document.getElementById('reader-display').innerHTML = `<h2>Scor: ${score}/${curSession.length}</h2>`;
-            document.getElementById('test-ui').innerHTML = `<button class="lvl-btn active-lvl" style="width:100%" onclick="backToList()">FINAL</button>`;
-            return; 
-        }
-        let itm = curSession[curIdx];
-        let qTxt = itm.q.split(/\s+/).map(w => `<span class="word" onclick="trans(this)">${w}</span>`).join(' ');
-        document.getElementById('reader-display').innerHTML = `<h3>${qTxt}</h3>`;
-        let html = itm.all.sort(() => 0.5 - Math.random()).map(o => {
-            let words = o.split(/\s+/).map(w => `<span class="word" onclick="trans(this); event.stopPropagation();">${w}</span>`).join(' ');
-            return `<div class="test-opt" data-ans="${o}" onclick="evalAns(this, '${o}', '${itm.cor}')"><div>${words}</div></div>`;
-        }).join('');
-        document.getElementById('test-ui').innerHTML = html;
-    }
-
-    function evalAns(el, sel, cor) {
-        const options = document.querySelectorAll('.test-opt');
-        options.forEach(o => o.style.pointerEvents = 'none');
-        let itm = curSession[curIdx];
-        
-        if(sel === cor) {
-            el.classList.add('ans-correct'); score++;
-            mistakes = mistakes.filter(m => m.q !== itm.q);
-        } else {
-            el.classList.add('ans-wrong');
-            // ARATĂ VARIANTA CORECTĂ CU VERDE
-            options.forEach(o => { if(o.getAttribute('data-ans') === cor) o.classList.add('ans-correct'); });
-            if(!mistakes.some(m => m.q === itm.q)) mistakes.push(itm);
-        }
-        localStorage.setItem('gm_mistakes', JSON.stringify(mistakes));
-        setTimeout(() => { curIdx++; showQ(); }, 1800); // Timp puțin mai lung să vezi răspunsul corect
-    }
-
-    function playAll() { 
-        synth.cancel();
-        let ut = new SpeechSynthesisUtterance(document.getElementById('reader-display').innerText);
-        ut.lang = 'de-DE'; ut.rate = config.rate; synth.speak(ut);
-    }
-
-    function playSelect() {
-        let selectedText = window.getSelection().toString();
-        if (!selectedText || selectedText.trim() === "") {
-            alert("Te rog selectează (evidențiază) un text cu degetul/mouse-ul mai întâi!");
-            return;
-        }
-        synth.cancel();
-        let ut = new SpeechSynthesisUtterance(selectedText);
-        ut.lang = 'de-DE';
-        ut.rate = config.rate;
-        synth.speak(ut);
-    }
-
-    function pauseAudio() { synth.pause(); }
+    function playAll() { synth.cancel(); let ut = new SpeechSynthesisUtterance(document.getElementById('reader-display').innerText); ut.lang = 'de-DE'; synth.speak(ut); }
     function stopAudio() { synth.cancel(); }
-
     function goHome() { 
-        document.getElementById('lvl-screen').classList.add('hidden');
-        document.getElementById('work-screen').classList.add('hidden');
-        document.getElementById('home-screen').classList.remove('hidden');
-        document.getElementById('nav-title').innerText = "GERMANA MASTER";
-        stopAudio();
+        document.documentElement.classList.remove('test-mode');
+        document.getElementById('lvl-screen').classList.add('hidden'); 
+        document.getElementById('work-screen').classList.add('hidden'); 
+        document.getElementById('home-screen').classList.remove('hidden'); 
+        stopAudio(); 
     }
-    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.remove('hidden'); stopAudio(); }
+    function backToList() { 
+        document.documentElement.classList.remove('test-mode');
+        document.getElementById('work-screen').classList.add('hidden'); 
+        document.getElementById('lvl-screen').classList.remove('hidden'); 
+        stopAudio(); 
+    }
     function toggleSet() { document.getElementById('set-panel').classList.toggle('open'); }
-    function doExport() {
-        let data = { db, mistakes, config };
-        let blob = new Blob([JSON.stringify(data)], {type:"application/json"});
-        let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download="backup_germana.json"; a.click();
-    }
-    function doImport(input) {
-        let file = input.files[0]; if(!file) return;
-        let r = new FileReader();
-        r.onload = (e) => {
-            let d = JSON.parse(e.target.result);
-            if(d.db) { db=d.db; mistakes=d.mistakes||[]; config=d.config||config; localStorage.setItem('gm_db_v3', JSON.stringify(db)); location.reload(); }
-        };
-        r.readAsText(file);
-    }
 </script>
 </body>
 </html>
