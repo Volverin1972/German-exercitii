@@ -365,24 +365,63 @@
 
         let pairedElement = null;
 
+        // Verifică dacă cuvântul are structură de verb conjugat
+        let isVerbLike = /(t|en|st|te|ten)$/i.test(cleanWordLower);
+
+        // Funcție ajutătoare pentru a verifica dacă un cuvânt conține puncție de separare de propoziție
+        const hasPunctuation = (wordEl) => /[.,!?;:]/.test(wordEl.innerText);
+
+        // 1. DACA S-A APĂSAT PE O PARTICULĂ SEPARABILĂ
         if (SEPARABLE_PREFIXES.includes(cleanWordLower)) {
-            for (let i = currentIndex - 1; i >= 0; i--) {
-                let prevWord = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
-                if (prevWord.length > 2 && !SEPARABLE_PREFIXES.includes(prevWord.toLowerCase())) {
-                    pairedElement = allWords[i];
-                    queryText = `${rawWord} ${prevWord}`;
-                    break;
+            // Verifică dacă este folosită ca prepoziție (urmată de alt cuvânt în aceeași clauză)
+            let isPreposition = false;
+            if (currentIndex < allWords.length - 1 && !hasPunctuation(el)) {
+                let nextWordRaw = allWords[currentIndex + 1].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
+                if (nextWordRaw.length > 0) {
+                    isPreposition = true; // Este urmată de un cuvânt, deci e mai probabil prepoziție
                 }
             }
-        } else {
-            for (let i = allWords.length - 1; i > currentIndex; i--) {
-                let nextWordLower = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim().toLowerCase();
-                if (SEPARABLE_PREFIXES.includes(nextWordLower)) {
-                    pairedElement = allWords[i];
-                    let prefixText = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
-                    queryText = `${prefixText} ${rawWord}`;
+
+            if (!isPreposition) {
+                // Caută verbul asociat înapoi, dar OPREȘTE-TE la prima virgulă/puncție
+                for (let i = currentIndex - 1; i >= 0; i--) {
+                    if (hasPunctuation(allWords[i])) break; // Am ieșit din clauză
+                    
+                    let prevWord = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
+                    let prevLower = prevWord.toLowerCase();
+
+                    if (prevWord.length > 2 && !SEPARABLE_PREFIXES.includes(prevLower) && /(t|en|st|te|ten)$/i.test(prevLower)) {
+                        pairedElement = allWords[i];
+                        queryText = `${rawWord} ${prevWord}`;
+                        break;
+                    }
+                }
+            }
+        } 
+        // 2. DACA S-A APĂSAT PE UN VERB
+        else if (isVerbLike) {
+            // Caută o particulă înainte de următoarea virgulă/puncție
+            for (let i = currentIndex + 1; i < allWords.length; i++) {
+                let currentWordEl = allWords[i];
+                let nextWordLower = currentWordEl.innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim().toLowerCase();
+
+                // Dacă întâlnim alt verb între timp, ne oprim (particula nu îi aparține)
+                if (nextWordLower.length > 2 && !SEPARABLE_PREFIXES.includes(nextWordLower) && /(t|en|st|te|ten)$/i.test(nextWordLower)) {
                     break;
                 }
+
+                if (SEPARABLE_PREFIXES.includes(nextWordLower)) {
+                    // Verifică dacă particula e la finalul clauzei (urmată de puncție sau e ultimul cuvânt)
+                    let isAtClauseEnd = (i === allWords.length - 1) || hasPunctuation(currentWordEl);
+                    if (isAtClauseEnd) {
+                        pairedElement = currentWordEl;
+                        let prefixText = currentWordEl.innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
+                        queryText = `${prefixText} ${rawWord}`;
+                        break;
+                    }
+                }
+
+                if (hasPunctuation(currentWordEl)) break; // Am ieșit din clauză
             }
         }
 
