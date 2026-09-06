@@ -126,6 +126,8 @@
     let historyIdx = -1;
     let isApplyingState = false;
 
+    const SEPARABLE_PREFIXES = ['ab', 'an', 'auf', 'aus', 'bei', 'ein', 'mit', 'nach', 'vor', 'zu', 'zurück', 'zusammen'];
+
     function saveState(screenId, title, qIdx = -1) {
         if (isApplyingState) return;
         if (historyIdx < appHistory.length - 1) appHistory = appHistory.slice(0, historyIdx + 1);
@@ -345,9 +347,8 @@
     function renderReading(txt) { document.getElementById('reader-display').innerHTML = txt.split(/\s+/).map(w => `<span class="word" onclick="trans(this)">${w}</span>`).join(' '); }
     
     async function trans(el) {
-        if(event) event.stopPropagation();
+        if(window.event) window.event.stopPropagation();
         document.querySelectorAll('.word').forEach(w => w.classList.remove('highlight-green'));
-        el.classList.add('highlight-green');
         
         let rawWord = el.innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
         if(!rawWord) return;
@@ -355,9 +356,43 @@
         let transBox = document.getElementById('trans-box');
         transBox.innerText = "Se traduce...";
 
-        // 1. Încercare cu canalul Google dict-chrome-ex (fără eroare CORS)
+        let queryText = rawWord;
+        let cleanWordLower = rawWord.toLowerCase();
+        
+        let parentSentence = el.parentElement;
+        let allWords = Array.from(parentSentence.querySelectorAll('.word'));
+        let currentIndex = allWords.indexOf(el);
+
+        let pairedElement = null;
+
+        if (SEPARABLE_PREFIXES.includes(cleanWordLower)) {
+            for (let i = currentIndex - 1; i >= 0; i--) {
+                let prevWord = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
+                if (prevWord.length > 2 && !SEPARABLE_PREFIXES.includes(prevWord.toLowerCase())) {
+                    pairedElement = allWords[i];
+                    queryText = `${rawWord} ${prevWord}`;
+                    break;
+                }
+            }
+        } else {
+            for (let i = allWords.length - 1; i > currentIndex; i--) {
+                let nextWordLower = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim().toLowerCase();
+                if (SEPARABLE_PREFIXES.includes(nextWordLower)) {
+                    pairedElement = allWords[i];
+                    let prefixText = allWords[i].innerText.replace(/[.,!?;:()"'„“»«]/g, '').trim();
+                    queryText = `${prefixText} ${rawWord}`;
+                    break;
+                }
+            }
+        }
+
+        el.classList.add('highlight-green');
+        if (pairedElement) {
+            pairedElement.classList.add('highlight-green');
+        }
+
         try {
-            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=de&tl=ro&dt=t&q=${encodeURIComponent(rawWord)}`);
+            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=dict-chrome-ex&sl=de&tl=ro&dt=t&q=${encodeURIComponent(queryText)}`);
             if(res.ok) {
                 let data = await res.json();
                 if(data && data[0] && data[0][0] && data[0][0][0]) {
@@ -367,9 +402,8 @@
             }
         } catch(e) {}
 
-        // 2. Rezervă: MyMemory API (Gratuit și stabil)
         try {
-            let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(rawWord)}&langpair=de|ro`);
+            let res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(queryText)}&langpair=de|ro`);
             if(res.ok) {
                 let data = await res.json();
                 if(data && data.responseData && data.responseData.translatedText) {
@@ -379,9 +413,8 @@
             }
         } catch(e) {}
 
-        // 3. Rezervă secundară: Google gtx
         try {
-            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ro&dt=t&q=${encodeURIComponent(rawWord)}`);
+            let res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=de&tl=ro&dt=t&q=${encodeURIComponent(queryText)}`);
             if(res.ok) {
                 let data = await res.json();
                 if(data && data[0] && data[0][0] && data[0][0][0]) {
