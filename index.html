@@ -345,7 +345,10 @@
         document.getElementById('reader-display').innerHTML = `<h3>${qHtml}</h3>`;
         document.getElementById('reader-display').className = ""; 
 
-        let html = itm.all.sort(() => 0.5 - Math.random()).map(o => {
+        // Amestecăm variantele doar vizual, dar păstrăm corectitudinea pe baza textului curat
+        let shuffledVariants = [...itm.all].sort(() => 0.5 - Math.random());
+
+        let html = shuffledVariants.map(o => {
             let optionWords = o.split(/\s+/).map(ow => `<span class="word" onclick="trans(this)">${ow}</span>`).join(' ');
             return `<div class="test-opt" onclick="evalAns(this, '${o.replace(/'/g, "\\'")}', '${itm.cor.replace(/'/g, "\\'")}')"><div>${optionWords}</div></div>`;
         }).join('');
@@ -360,12 +363,13 @@
         let slot = document.getElementById('answer-slot');
         if(slot) slot.innerText = sel;
 
-        if(sel === cor) {
+        // Comparație directă între textul selectat și răspunsul corect oficial din rând
+        if(sel.trim() === cor.trim()) {
             el.classList.add('ans-correct'); document.getElementById('reader-display').classList.add('glow-ui');
             score++;
         } else {
             el.classList.add('ans-wrong'); document.getElementById('reader-display').classList.add('shake-ui');
-            options.forEach(o => { if(o.innerText.trim() === cor) o.classList.add('ans-correct'); });
+            options.forEach(o => { if(o.innerText.trim() === cor.trim()) o.classList.add('ans-correct'); });
         }
         
         if(itm.expl) {
@@ -410,7 +414,7 @@
         checkResume();
         stopAudio(); 
     }
-    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.remove('hidden'); stopAudio(); }
+    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.add('hidden'); document.getElementById('home-screen').classList.remove('hidden'); stopAudio(); }
     function toggleSet() { document.getElementById('set-panel').classList.toggle('open'); }
     function doExport() { let blob = new Blob([JSON.stringify({db, config})], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download="backup_germana.json"; a.click(); }
     function doImport(input) { let file = input.files[0]; if(!file) return; let r = new FileReader(); r.onload = (e) => { let d = JSON.parse(e.target.result); if(d.db) { db=d.db; localStorage.setItem('gm_db_v3', JSON.stringify(db)); location.reload(); } }; r.readAsText(file); }
