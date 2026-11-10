@@ -300,11 +300,12 @@
         lastShuffle = shuffle;
         let pool = raw.split('\n').filter(l => l.includes('|')).map(line => {
             let p = line.split('|').map(x => x.trim());
-            let q = p[0], cor = p[1], expl = "";
-            let variants = p.slice(1);
-            if(p.length > 3 && (p[p.length-1].length > 10 || p[p.length-1].includes(' '))) {
-                expl = p[p.length-1];
-                variants = p.slice(1, p.length-1);
+            let q = p[0];
+            let cor = p[1]; // În formatul tău, prima opțiune de după Întrebare este mereu Răspunsul Corect
+            let expl = "";
+            let variants = p.slice(1, 5); // Primele 4 opțiuni sunt variantele de răspuns
+            if(p.length > 5) {
+                expl = p[p.length - 1]; // Ultima parte este explicația în ro, dacă există
             }
             return { q, cor, expl, all: variants };
         });
@@ -345,17 +346,19 @@
         document.getElementById('reader-display').innerHTML = `<h3>${qHtml}</h3>`;
         document.getElementById('reader-display').className = ""; 
 
-        // Amestecăm variantele doar vizual, dar păstrăm corectitudinea pe baza textului curat
+        // Amestecăm variantele vizual pe ecran
         let shuffledVariants = [...itm.all].sort(() => 0.5 - Math.random());
 
         let html = shuffledVariants.map(o => {
             let optionWords = o.split(/\s+/).map(ow => `<span class="word" onclick="trans(this)">${ow}</span>`).join(' ');
-            return `<div class="test-opt" onclick="evalAns(this, '${o.replace(/'/g, "\\'")}', '${itm.cor.replace(/'/g, "\\'")}')"><div>${optionWords}</div></div>`;
+            // Transmitem direct textul opțiunii și textul răspunsului corect (cor) pentru verificare sigură
+            let isCorrectStr = (o.trim() === itm.cor.trim()) ? 'true' : 'false';
+            return `<div class="test-opt" onclick="evalAns(this, '${o.replace(/'/g, "\\'")}', ${isCorrectStr}, '${itm.cor.replace(/'/g, "\\'")}')"><div>${optionWords}</div></div>`;
         }).join('');
         document.getElementById('test-ui').innerHTML = html;
     }
 
-    function evalAns(el, sel, cor) {
+    function evalAns(el, sel, isCorrect, cor) {
         if(event.target.classList.contains('word')) return;
         const options = document.querySelectorAll('.test-opt');
         options.forEach(o => o.style.pointerEvents = 'none');
@@ -363,8 +366,7 @@
         let slot = document.getElementById('answer-slot');
         if(slot) slot.innerText = sel;
 
-        // Comparație directă între textul selectat și răspunsul corect oficial din rând
-        if(sel.trim() === cor.trim()) {
+        if(isCorrect) {
             el.classList.add('ans-correct'); document.getElementById('reader-display').classList.add('glow-ui');
             score++;
         } else {
@@ -414,7 +416,7 @@
         checkResume();
         stopAudio(); 
     }
-    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.add('hidden'); document.getElementById('home-screen').classList.remove('hidden'); stopAudio(); }
+    function backToList() { document.getElementById('work-screen').classList.add('hidden'); document.getElementById('lvl-screen').classList.remove('hidden'); stopAudio(); }
     function toggleSet() { document.getElementById('set-panel').classList.toggle('open'); }
     function doExport() { let blob = new Blob([JSON.stringify({db, config})], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download="backup_germana.json"; a.click(); }
     function doImport(input) { let file = input.files[0]; if(!file) return; let r = new FileReader(); r.onload = (e) => { let d = JSON.parse(e.target.result); if(d.db) { db=d.db; localStorage.setItem('gm_db_v3', JSON.stringify(db)); location.reload(); } }; r.readAsText(file); }
